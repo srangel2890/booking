@@ -4,12 +4,12 @@ module Api
     class EventsController < ApplicationController
       def index
         events = Event.includes(:venue, :ticket_types)
-        render json: events.as_json(include: [:venue, :ticket_types])
+        render json: events.map { |event| EventSerializer.new(event).as_json }
       end
 
       def show
         event = Event.includes(:venue, :ticket_types).find(params[:id])
-        render json: event.as_json(include: [:venue, :ticket_types])
+        render json: EventSerializer.new(event).as_json
       end
 
       def create
