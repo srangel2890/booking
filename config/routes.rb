@@ -16,6 +16,10 @@ Rails.application.routes.draw do
     namespace :api do
       namespace :v1 do
         resources :events
+        resources :reservations
+        get "me", to: "auth#me"
+        post "signup", to: "auth#signup"
+        post "login", to: "auth#login"
       end
     end
   end

@@ -2,6 +2,8 @@
 module Api
   module V1
     class EventsController < ApplicationController
+      before_action :authenticate_user!
+      
       def index
         events = Event.includes(:venue, :ticket_types)
         render json: events.map { |event| EventSerializer.new(event).as_json }

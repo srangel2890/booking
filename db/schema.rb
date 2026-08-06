@@ -40,6 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_04_180016) do
     t.integer "event_id"
     t.string "name"
     t.decimal "price", precision: 10, scale: 2
+    t.integer "quantity"
     t.datetime "updated_at", null: false
   end
 
