@@ -38,6 +38,7 @@ RSpec.describe "Api::V1::Events", type: :request do
     TicketType.create!(
       name: "General",
       price: 500,
+      quantity: 5, 
       event: event
     )
   end
