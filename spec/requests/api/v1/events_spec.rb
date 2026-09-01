@@ -33,9 +33,15 @@ RSpec.describe "Api::V1::Events", type: :request do
     )
   end
 
+  let(:headers) do
+  {
+    "Authorization" => "Bearer #{user.get_token}"
+  }
+end
+
   describe "GET /api/v1/events" do
     it "returns all events" do
-      get "/api/v1/events"
+      get "/api/v1/events", headers: headers
 
       expect(response).to have_http_status(:ok)
 
@@ -51,7 +57,7 @@ RSpec.describe "Api::V1::Events", type: :request do
 
   describe "GET /api/v1/events/:id" do
     it "returns the requested event" do
-      get "/api/v1/events/#{event.id}"
+      get "/api/v1/events/#{event.id}", headers: headers
 
       expect(response).to have_http_status(:ok)
 
