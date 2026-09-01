@@ -10,9 +10,15 @@ module Api
       end
 
       def create
+        if tickets_params.blank?
+          return render json: {
+            error: "Reservation must contain at least one ticket"
+          }, status: :unprocessable_entity
+        end
+
         event = Event.find(reservation_params[:event_id])
 
-        ticket_types = reservation_params[:tickets].map do |ticket|
+        ticket_types = tickets_params.map do |ticket|
           TicketType.find(ticket[:ticket_type_id])
         end
 
@@ -43,11 +49,11 @@ module Api
         ActiveRecord::Base.transaction do
           reservation.save!
 
-          reservation_params[:tickets].each do |ticket_params|
+          tickets_params.each do |tickets_params|
             reservation.tickets.create!(
-              ticket_type_id: ticket_params[:ticket_type_id],
-              attendee_name: ticket_params[:attendee_name],
-              attendee_email: ticket_params[:attendee_email],
+              ticket_type_id: tickets_params[:ticket_type_id],
+              attendee_name: tickets_params[:attendee_name],
+              attendee_email: tickets_params[:attendee_email],
               code: SecureRandom.hex(8)
             )
           end
@@ -78,6 +84,10 @@ module Api
             :attendee_email
           ]
         )
+      end
+
+      def tickets_params
+        @tickets_params ||= reservation_params[:tickets]
       end
     end
   end
