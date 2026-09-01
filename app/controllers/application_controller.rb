@@ -1,14 +1,5 @@
-# app/controllers/application_controller.rb
 class ApplicationController < ActionController::API
   private
-
-  def encode_token(payload)
-    JWT.encode(
-      payload,
-      Rails.application.secret_key_base,
-      "HS256"
-    )
-  end
 
   def decoded_token
     header = request.headers["Authorization"]
@@ -18,7 +9,7 @@ class ApplicationController < ActionController::API
 
     JWT.decode(
       token,
-      Rails.application.secret_key_base,
+      Rails.application.credentials.secret_jwt_key,
       true,
       algorithm: "HS256"
     ).first

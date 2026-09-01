@@ -7,8 +7,7 @@ class UserSerializer
     {
       id: @user.id,
       name: @user.name,
-      email: @user.email,
-      token: @user.get_token
+      email: @user.email
     }
   end
 end

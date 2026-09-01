@@ -8,7 +8,7 @@ class User < ApplicationRecord
 
   def get_token
     id_object = {user_id: self.id}
-    token = encode_token(id_object)
+    encode_token(id_object)
   end
 
   def encode_token(id_object)
