@@ -69,4 +69,43 @@ end
       expect(body["ticket_types"].first["name"]).to eq("General")
     end
   end
+
+  describe "POST /api/v1/events" do
+    it "creates an event for the authenticated user" do
+      expect {
+        post "/api/v1/events",
+            params: {
+              event: {
+                name: "Nuevo concierto",
+                starts_at: 2.months.from_now,
+                venue_id: venue.id
+              }
+            },
+            headers: headers
+      }.to change(Event, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+
+      created_event = Event.order(:created_at).last
+
+      expect(created_event.name).to eq("Nuevo concierto")
+      expect(created_event.user_id).to eq(user.id)
+      expect(created_event.venue_id).to eq(venue.id)
+    end
+
+    it "requires authentication" do
+      expect {
+        post "/api/v1/events",
+            params: {
+              event: {
+                name: "Nuevo concierto",
+                starts_at: 2.months.from_now,
+                venue_id: venue.id
+              }
+            }
+      }.not_to change(Event, :count)
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
 end

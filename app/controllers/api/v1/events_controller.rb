@@ -15,12 +15,13 @@ module Api
       end
 
       def create
-        event = Event.new(event_params)
+        event = current_user.events.new(event_params)
 
         if event.save
-          render json: event, status: :created
+          render json: EventSerializer.new(event).as_json, status: :created
         else
-          render json: { errors: event.errors.full_messages }, status: :unprocessable_entity
+          render json: { errors: event.errors.full_messages },
+                status: :unprocessable_content
         end
       end
 
@@ -50,7 +51,6 @@ module Api
           :ends_at,
           :sales_end_date,
           :capacity,
-          :user_id,
           :venue_id,
         )
       end
