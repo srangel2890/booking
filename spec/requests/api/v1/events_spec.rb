@@ -10,6 +10,15 @@ RSpec.describe "Api::V1::Events", type: :request do
     )
   end
 
+  let!(:other_user) do
+    User.create!(
+      email: "other@example.com",
+      name: "Other User",
+      password: "password123",
+      password_confirmation: "password123"
+    )
+  end
+
   let!(:venue) do
     Venue.create!(
       name: "Teatro Metropolitano"
@@ -34,10 +43,10 @@ RSpec.describe "Api::V1::Events", type: :request do
   end
 
   let(:headers) do
-  {
-    "Authorization" => "Bearer #{user.get_token}"
-  }
-end
+    {
+      "Authorization" => "Bearer #{user.get_token}"
+    }
+  end
 
   describe "GET /api/v1/events" do
     it "returns all events" do
@@ -106,6 +115,60 @@ end
       }.not_to change(Event, :count)
 
       expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe "PATCH /api/v1/events/:id" do
+    it "allows the owner to update the event" do
+      patch "/api/v1/events/#{event.id}",
+            params: {
+              event: {
+                name: "Concierto actualizado"
+              }
+            },
+            headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(event.reload.name).to eq("Concierto actualizado")
+    end
+
+    it "does not allow another user to update the event" do
+      other_headers = {
+        "Authorization" => "Bearer #{other_user.get_token}"
+      }
+
+      patch "/api/v1/events/#{event.id}",
+            params: {
+              event: {
+                name: "Evento robado"
+              }
+            },
+            headers: other_headers
+
+      expect(response).to have_http_status(:not_found)
+      expect(event.reload.name).to eq("Concierto de prueba")
+    end
+  end
+
+  describe "DELETE /api/v1/events/:id" do
+    it "allows the owner to delete the event" do
+      expect {
+        delete "/api/v1/events/#{event.id}", headers: headers
+      }.to change(Event, :count).by(-1)
+
+      expect(response).to have_http_status(:no_content)
+    end
+
+    it "does not allow another user to delete the event" do
+      other_headers = {
+        "Authorization" => "Bearer #{other_user.get_token}"
+      }
+
+      expect {
+        delete "/api/v1/events/#{event.id}", headers: other_headers
+      }.not_to change(Event, :count)
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 end
