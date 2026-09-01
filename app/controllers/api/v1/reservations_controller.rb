@@ -16,6 +16,15 @@ module Api
           TicketType.find(ticket[:ticket_type_id])
         end
 
+        ticket_type_counts = ticket_types.tally
+        ticket_type_counts.each do |ticket_type, requested_quantity|
+          if requested_quantity > ticket_type.quantity
+            return render json: {
+              error: "Not enough tickets available for #{ticket_type.name}"
+            }, status: :unprocessable_entity
+          end
+        end
+
         unless ticket_types.all? { |ticket_type| ticket_type.event_id == event.id }
           return render json: { error: "Invalid ticket type for this event" },
                         status: :unprocessable_entity
@@ -40,6 +49,12 @@ module Api
               attendee_name: ticket_params[:attendee_name],
               attendee_email: ticket_params[:attendee_email],
               code: SecureRandom.hex(8)
+            )
+          end
+
+          ticket_type_counts.each do |ticket_type, requested_quantity|
+            ticket_type.update!(
+              quantity: ticket_type.quantity - requested_quantity
             )
           end
         end
